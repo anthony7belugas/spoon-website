@@ -1,0 +1,198 @@
+/* ===========================================================
+   SPOON USC — editorial food-magazine identity
+   Lead color: deep Spoon red (#980000). Paper + ink + honey.
+   Display: Fraunces (used confidently)  /  Body: DM Sans
+   Principle: restraint. The red and the type do the work.
+   =========================================================== */
+
+:root{
+  --red:#980000; --red-deep:#7a0000; --red-soft:#a82828;
+  --paper:#fbf6ee; --paper-2:#f3e9da; --bone:#fcf8f2;
+  --ink:#1b1310; --ink-2:#3a2c25;
+  --honey:#e7b54a; --honey-deep:#c9982f;
+  --taupe:#857467; --taupe-2:#a99a8c;
+  --line:#e4d8c6; --line-strong:#d6c7b1;
+  --maxw:1140px; --gutter:26px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.62;
+  font-size:17px; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+img,svg{display:block; max-width:100%}
+a{color:inherit; text-decoration:none}
+
+h1,h2,h3,.serif{
+  font-family:'Fraunces',Georgia,'Times New Roman',serif;
+  font-optical-sizing:auto; line-height:1.0; letter-spacing:-.015em; font-weight:500;
+}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 var(--gutter)}
+
+.eyebrow{
+  font-size:12px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--red);
+  display:inline-flex; align-items:center; gap:10px;
+}
+.eyebrow.light{color:var(--honey)}
+.eyebrow .tick{width:22px; height:1px; background:currentColor; display:inline-block}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex; align-items:center; gap:9px; font-weight:600; font-size:15px;
+  padding:13px 24px; border-radius:999px; border:1.5px solid transparent; cursor:pointer;
+  transition:transform .2s var(--ease), background .2s, color .2s, border-color .2s;
+}
+.btn:hover{transform:translateY(-2px)}
+.btn-red{background:var(--red); color:var(--bone)} .btn-red:hover{background:var(--red-deep)}
+.btn-ink{background:var(--ink); color:var(--bone)} .btn-ink:hover{background:#000}
+.btn-bone{background:var(--bone); color:var(--red)} .btn-bone:hover{background:#fff}
+.btn-line{border-color:var(--ink); color:var(--ink)} .btn-line:hover{background:var(--ink); color:var(--bone)}
+.btn-line-light{border-color:rgba(252,248,242,.5); color:var(--bone)} .btn-line-light:hover{background:var(--bone); color:var(--red); border-color:var(--bone)}
+
+/* ---------- Nav ---------- */
+.nav{position:sticky; top:0; z-index:100; background:rgba(251,246,238,.85); backdrop-filter:saturate(140%) blur(10px); border-bottom:1px solid var(--line)}
+.nav-inner{max-width:var(--maxw); margin:0 auto; padding:15px var(--gutter); display:flex; align-items:center; justify-content:space-between; gap:20px}
+.brand{display:flex; align-items:center; gap:11px}
+.brand .logo{width:32px; height:32px}
+.brand .name{font-family:'Fraunces',serif; font-weight:600; font-size:21px; letter-spacing:-.01em; color:var(--red)}
+.nav-links{display:flex; gap:30px}
+.nav-links a{font-size:15px; font-weight:500; position:relative; padding:4px 0; color:var(--ink-2)}
+.nav-links a::after{content:""; position:absolute; left:0; right:100%; bottom:-1px; height:1.5px; background:var(--red); transition:right .25s var(--ease)}
+.nav-links a:hover::after,.nav-links a[aria-current="page"]::after{right:0}
+.nav-links a[aria-current="page"]{color:var(--ink)}
+@media(max-width:840px){.nav-links{display:none}}
+
+/* ---------- Hero ---------- */
+.hero{
+  position:relative; color:var(--bone); min-height:calc(100vh - 64px);
+  display:grid; place-items:center; text-align:center; overflow:hidden; padding:70px 24px 96px;
+  background:radial-gradient(125% 95% at 50% -8%, var(--red-soft) 0%, var(--red) 44%, var(--red-deep) 100%);
+}
+.hero::before{ /* concentric rings echoing the logo circle */
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(closest-side,transparent 79%,rgba(252,248,242,.07) 80%,transparent 82%) center/min(1000px,128vw) min(1000px,128vw) no-repeat,
+    radial-gradient(closest-side,transparent 64%,rgba(252,248,242,.055) 65%,transparent 67%) center/min(700px,96vw) min(700px,96vw) no-repeat,
+    radial-gradient(closest-side,transparent 47%,rgba(252,248,242,.045) 48%,transparent 50%) center/min(460px,68vw) min(460px,68vw) no-repeat;
+}
+.hero-inner{position:relative; max-width:840px}
+/* WEEK 2: the 3D spoon animation replaces .hero-spoon */
+.hero-spoon{width:80px; height:80px; margin:0 auto 30px; color:var(--bone)}
+.hero h1{font-size:clamp(58px,12vw,138px); font-weight:500; letter-spacing:-.03em}
+.hero h1 em{font-style:italic; font-weight:400}
+.hero .tagline{margin:24px auto 0; max-width:540px; font-size:clamp(18px,2.4vw,22px); color:rgba(252,248,242,.9); line-height:1.45}
+.hero-actions{margin-top:36px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap}
+.scroll-cue{position:absolute; bottom:28px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:9px; color:rgba(252,248,242,.7); font-size:11px; letter-spacing:.22em; text-transform:uppercase}
+.scroll-cue svg{width:20px; height:20px; animation:bob 1.9s var(--ease) infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+
+/* ---------- Section scaffold ---------- */
+.section{padding:96px 0}
+.section.tight{padding:72px 0}
+.lede{max-width:720px}
+.lede h2{font-size:clamp(34px,5.4vw,62px); margin-top:18px}
+.lede p{margin-top:18px; color:var(--taupe); font-size:19px; max-width:54ch}
+
+/* ---------- Free-eats feature (home) ---------- */
+.feature{display:grid; grid-template-columns:1.15fr .85fr; gap:56px; align-items:center}
+.feature h2{font-size:clamp(32px,4.6vw,52px); margin:18px 0 20px}
+.feature p{color:var(--taupe); max-width:46ch; font-size:18px}
+.feature .actions{margin-top:28px}
+.drop{
+  background:linear-gradient(155deg,var(--red) 0%,var(--red-deep) 100%); color:var(--bone);
+  border-radius:18px; padding:34px 34px 32px; box-shadow:0 22px 50px rgba(122,0,0,.22);
+  position:relative; overflow:hidden;
+}
+.drop::after{content:""; position:absolute; right:-40px; bottom:-40px; width:160px; height:160px; border-radius:50%; border:1px solid rgba(252,248,242,.14)}
+.drop .label{color:var(--honey); font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase}
+.drop .item{font-family:'Fraunces',serif; font-size:clamp(28px,4vw,38px); font-weight:500; margin:12px 0 14px; line-height:1.04}
+.drop .det{display:flex; flex-direction:column; gap:5px; color:rgba(252,248,242,.85); font-size:15px}
+.drop .det span{display:flex; gap:9px; align-items:center}
+.drop .det .k{color:rgba(252,248,242,.55); width:54px; flex:none; font-size:13px; letter-spacing:.04em; text-transform:uppercase}
+
+/* ---------- Editorial index (home + articles) ---------- */
+.index{border-top:1px solid var(--line-strong)}
+.row{
+  display:flex; justify-content:space-between; align-items:baseline; gap:32px;
+  padding:30px 8px; border-bottom:1px solid var(--line); transition:background .2s, padding .25s var(--ease);
+}
+.row:hover{background:var(--bone); padding-left:18px; padding-right:18px}
+.row-main{display:flex; align-items:baseline; gap:30px; min-width:0}
+.row .num{font-family:'Fraunces',serif; font-size:18px; color:var(--taupe-2); width:2.4ch; flex:none; font-weight:400}
+.row-text{min-width:0}
+.row .cat{font-size:11.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--red)}
+.row h3{font-size:clamp(22px,2.6vw,29px); margin:7px 0 8px; font-weight:500; transition:color .2s}
+.row:hover h3{color:var(--red)}
+.row .dek{color:var(--taupe); font-size:16px; max-width:62ch}
+.row .meta{color:var(--taupe-2); font-size:13.5px; white-space:nowrap; text-align:right; flex:none; padding-top:4px}
+@media(max-width:680px){
+  .row{flex-direction:column; gap:10px}
+  .row-main{gap:18px}
+  .row .meta{text-align:left}
+}
+
+/* ---------- Free eats list (free-eats page) ---------- */
+.eats{border-top:1px solid var(--line-strong)}
+.eat{display:grid; grid-template-columns:90px 1fr auto; gap:30px; align-items:center; padding:24px 8px; border-bottom:1px solid var(--line); transition:background .2s, padding .25s var(--ease)}
+.eat:hover{background:var(--bone); padding-left:18px; padding-right:18px}
+.eat .date{text-align:center; font-family:'Fraunces',serif; line-height:1}
+.eat .date .d{font-size:36px; font-weight:500; color:var(--red)}
+.eat .date .m{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--taupe); font-family:'DM Sans',sans-serif; margin-top:4px}
+.eat h3{font-size:22px; font-weight:500}
+.eat .sub{color:var(--taupe); font-size:15px; margin-top:3px}
+.eat .tag{background:var(--honey); color:#5a4410; font-weight:700; font-size:11.5px; letter-spacing:.06em; padding:6px 14px; border-radius:999px; white-space:nowrap; text-transform:uppercase}
+@media(max-width:620px){.eat{grid-template-columns:64px 1fr} .eat .tag{grid-column:2; justify-self:start}}
+
+/* ---------- Team roster (team page) ---------- */
+.roster{border-top:1px solid var(--line-strong)}
+.member{display:flex; justify-content:space-between; align-items:baseline; gap:24px; padding:26px 8px; border-bottom:1px solid var(--line)}
+.member .who{display:flex; align-items:baseline; gap:22px}
+.member .mono{width:34px; height:34px; border:1.5px solid var(--red); border-radius:50%; display:grid; place-items:center; font-family:'Fraunces',serif; color:var(--red); font-size:16px; flex:none; transform:translateY(3px)}
+.member h3{font-size:24px; font-weight:500}
+.member .role{color:var(--taupe); font-size:14.5px; white-space:nowrap}
+.member.open h3{color:var(--taupe-2)} .member.open .mono{border-color:var(--line-strong); color:var(--taupe-2)}
+@media(max-width:560px){.member .who{gap:16px}}
+
+/* ---------- Quiet CTA band ---------- */
+.band{background:var(--ink); color:var(--bone)}
+.band-inner{max-width:var(--maxw); margin:0 auto; padding:74px var(--gutter); display:flex; justify-content:space-between; align-items:center; gap:30px; flex-wrap:wrap}
+.band h2{font-size:clamp(28px,3.8vw,42px); font-weight:500; max-width:18ch}
+.band p{color:rgba(252,248,242,.7); margin-top:10px}
+
+/* ---------- Page header (subpages) ---------- */
+.page-head{background:var(--paper-2); border-bottom:1px solid var(--line); padding:70px 0 60px}
+.page-head .eyebrow{margin-bottom:16px}
+.page-head h1{font-size:clamp(42px,7.2vw,80px); font-weight:500}
+.page-head p{margin-top:18px; max-width:56ch; color:var(--taupe); font-size:19px}
+
+/* ---------- Events stub ---------- */
+.stub{text-align:center; padding:96px 24px}
+.stub .mark{width:48px; height:48px; color:var(--red); margin:0 auto 24px}
+.stub h2{font-size:clamp(30px,5vw,48px); font-weight:500}
+.stub p{color:var(--taupe); max-width:50ch; margin:18px auto 0; font-size:19px}
+
+/* ---------- Footer ---------- */
+.footer{background:var(--red); color:var(--bone)}
+.footer-inner{max-width:var(--maxw); margin:0 auto; padding:64px var(--gutter) 34px; display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:34px}
+.footer .brand .name{color:var(--bone)}
+.footer-lead{color:rgba(252,248,242,.82); margin-top:16px; max-width:32ch; font-size:16px}
+.footer h4{font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--honey); margin-bottom:16px}
+.footer-col a{display:block; color:rgba(252,248,242,.85); padding:6px 0; font-size:15.5px}
+.footer-col a:hover{color:var(--bone)}
+.footer-bottom{border-top:1px solid rgba(252,248,242,.2); max-width:var(--maxw); margin:30px auto 0; padding:22px var(--gutter) 44px; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:13.5px; color:rgba(252,248,242,.68)}
+@media(max-width:720px){.footer-inner{grid-template-columns:1fr 1fr}}
+
+/* ---------- a11y ---------- */
+:focus-visible{outline:3px solid var(--honey); outline-offset:3px; border-radius:4px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important; scroll-behavior:auto!important}}
+@media(max-width:760px){.feature{grid-template-columns:1fr; gap:34px} .section{padding:64px 0}}
+
+/* crisp item text on the drop panel */
+.drop .item{color:var(--bone)}
+
+/* directory rows (home) — same hairline pattern, arrow instead of meta */
+.row .arrow{font-size:23px; color:var(--taupe-2); flex:none; padding-top:2px; transition:transform .25s var(--ease), color .2s}
+.row:hover .arrow{color:var(--red); transform:translateX(5px)}
+.dir .row-text .dek{font-size:16.5px}
