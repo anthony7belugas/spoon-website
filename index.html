@@ -10,6 +10,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
+<style>
+  /* Week 2 — 3D spoon hero stage (falls back to the .hero-spoon SVG) */
+  .hero-spoon3d{position:relative; width:100%; max-width:440px; height:clamp(240px,46vh,420px); margin:0 auto 10px}
+  .hero-spoon3d::before{content:""; position:absolute; inset:8% 12%; background:radial-gradient(closest-side, rgba(255,214,150,.18), transparent 72%); filter:blur(8px); pointer-events:none}
+  .hero-spoon3d canvas{position:relative; display:block; width:100%!important; height:100%!important; pointer-events:none}
+  .hero-spoon3d .hero-spoon{position:absolute; top:50%; left:50%; margin:0; transform:translate(-50%,-50%)}
+</style>
 </head>
 <body>
 
@@ -25,11 +32,13 @@
   </div>
 </nav>
 
-<!-- WEEK 2: the 3D spoon scroll animation replaces .hero-spoon -->
 <header class="hero">
   <div class="hero-inner">
-    <div class="hero-spoon" aria-hidden="true">
-      <svg viewBox="0 0 100 100" fill="currentColor"><ellipse cx="50" cy="30" rx="15" ry="20"/><path d="M50 49c-3.4 0-4.9 2-4.8 5.1l1.1 31c.09 2.8 1.7 4.3 3.7 4.3s3.6-1.5 3.7-4.3l1.1-31c.1-3.1-1.4-5.1-4.8-5.1Z"/></svg>
+    <!-- WEEK 2: 3D spoon animation. Mounts a canvas here; the SVG below is the no-WebGL / reduced-motion fallback. -->
+    <div class="hero-spoon3d" id="spoonStage" aria-hidden="true">
+      <div class="hero-spoon">
+        <svg viewBox="0 0 100 100" fill="currentColor"><ellipse cx="50" cy="30" rx="15" ry="20"/><path d="M50 49c-3.4 0-4.9 2-4.8 5.1l1.1 31c.09 2.8 1.7 4.3 3.7 4.3s3.6-1.5 3.7-4.3l1.1-31c.1-3.1-1.4-5.1-4.8-5.1Z"/></svg>
+      </div>
     </div>
     <p class="eyebrow light"><span class="tick"></span>All things food</p>
     <h1>Spoon <em>USC</em></h1>
@@ -51,6 +60,16 @@
   </div>
   <div class="footer-bottom"><span>&copy; 2026 Spoon USC &middot; made by students who like to eat</span><span>University of Southern California, Los Angeles</span></div>
 </footer>
+
+<!-- Three.js via import map, then the hero animation -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+<script type="module" src="spoon-3d.js"></script>
 
 </body>
 </html>
