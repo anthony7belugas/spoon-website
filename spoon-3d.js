@@ -1,14 +1,14 @@
 /* ============================================================
-   Spoon USC — hero 3D spoon (v5)
+   Spoon USC — hero 3D spoon (v6)
    One continuous lofted surface: a slim handle with a rounded,
    blunt tip flowing into a rounded, scooped oval bowl. Warm
-   ivory ceramic, soft studio lighting. Rests facing forward,
-   turns evenly toward the cursor. Falls back to the static SVG
+   ivory ceramic, soft studio lighting. Rests facing forward and
+   tracks the cursor responsively. Falls back to the static SVG
    spoon if WebGL is unavailable or motion is reduced.
    ------------------------------------------------------------
    Easy knobs: SPOON_COLOR / METALNESS / ROUGHNESS below, and
    toneMappingExposure a few lines down (higher = brighter).
-   Shape knobs: BOWL_W (width), SCOOP (bowl depth), Y_TIP/Y_TOP.
+   Motion knobs: TRACK (responsiveness), MOUSE_TURN (throw).
    ============================================================ */
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -17,6 +17,11 @@ import { ParametricGeometry } from 'three/addons/geometries/ParametricGeometry.j
 const SPOON_COLOR = 0xf3e9d8;  // warm ivory. try 0xe9d6ac + METALNESS 1 for champagne metal
 const METALNESS   = 0.0;       // 0 = ceramic, 1 = metal
 const ROUGHNESS   = 0.30;      // lower = glossier
+
+/* ---- motion ---- */
+const TRACK = 0.12;            // cursor catch-up speed (higher = snappier)
+const MOUSE_TURN = 1.0;        // how far it turns toward the cursor (radians across half-screen)
+const IDLE_TURN = 0.07;        // gentle idle sway amplitude
 
 /* ---- spoon shape params ---- */
 const Y_TIP = -2.15, Y_TOP = 1.9;    // handle tip (bottom) -> bowl top
@@ -106,12 +111,13 @@ function init(stage) {
   }, { passive: true });
 
   function drawFrame(t) {
-    curX += (ptrX - curX) * 0.05;
-    curY += (ptrY - curY) * 0.05;
+    curX += (ptrX - curX) * TRACK;   // snappy cursor catch-up
+    curY += (ptrY - curY) * TRACK;
     const time = t * 0.001;
-    pivot.rotation.y = BASE_RY + Math.sin(time * 0.3) * 0.28 + curX * 0.7;
-    pivot.rotation.x = BASE_RX + Math.sin(time * 0.23) * 0.07 + curY * 0.28;
-    pivot.position.y = Math.sin(time * 0.6) * 0.10 - scrollF * 0.4;
+    // cursor is the dominant motion; idle is a subtle breathe underneath
+    pivot.rotation.y = BASE_RY + curX * MOUSE_TURN + Math.sin(time * 0.28) * IDLE_TURN;
+    pivot.rotation.x = BASE_RX + curY * (MOUSE_TURN * 0.5) + Math.sin(time * 0.22) * (IDLE_TURN * 0.6);
+    pivot.position.y = Math.sin(time * 0.55) * 0.08 - scrollF * 0.4;
     pivot.scale.setScalar(0.95 * (1 - scrollF * 0.12));
     renderer.render(scene, camera);
   }
