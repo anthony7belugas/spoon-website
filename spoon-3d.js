@@ -1,11 +1,10 @@
 /* ============================================================
-   Spoon USC — hero 3D spoon (v4, rounded one-piece)
-   One continuous lofted surface: a slim handle with a rounded
-   tip flowing into a rounded, scooped oval bowl (domed at the
-   far end, not pointed). Warm ivory ceramic, soft studio
-   lighting. Rests facing forward, turns evenly toward the
-   cursor. Falls back to the static SVG spoon if WebGL is
-   unavailable or motion is reduced.
+   Spoon USC — hero 3D spoon (v5)
+   One continuous lofted surface: a slim handle with a rounded,
+   blunt tip flowing into a rounded, scooped oval bowl. Warm
+   ivory ceramic, soft studio lighting. Rests facing forward,
+   turns evenly toward the cursor. Falls back to the static SVG
+   spoon if WebGL is unavailable or motion is reduced.
    ------------------------------------------------------------
    Easy knobs: SPOON_COLOR / METALNESS / ROUGHNESS below, and
    toneMappingExposure a few lines down (higher = brighter).
@@ -20,11 +19,12 @@ const METALNESS   = 0.0;       // 0 = ceramic, 1 = metal
 const ROUGHNESS   = 0.30;      // lower = glossier
 
 /* ---- spoon shape params ---- */
-const Y_TIP = -2.3, Y_TOP = 1.9;      // handle tip (bottom) -> bowl top
-const T_HANDLE = 0.07;               // handle half-thickness (thin, flat)
+const Y_TIP = -2.15, Y_TOP = 1.9;    // handle tip (bottom) -> bowl top
+const T_HANDLE = 0.075;              // handle half-thickness (thin, flat)
 const SCOOP = 0.32, UNDER = 0.48;    // bowl scoop depth / underside bulge
 const BEND  = 0.30;                  // gentle lengthwise curve (bowl tips forward)
 const BOWL_VC = 0.72, BOWL_VR = 0.28, BOWL_W = 0.70; // bowl oval: center / half-length / half-width
+const HANDLE_W = 0.15;               // handle half-width (fuller = less spindly)
 
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const smooth = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
@@ -133,10 +133,7 @@ function init(stage) {
 /* ---- the spoon as one continuous surface --------------------
    v (0..1): tip -> bowl-top along the length.
    u (0..1): around the cross-section — front (scoop) for u<=0.5,
-   back (underside) for u>0.5. Width follows a slim handle (max'd
-   with) a rounded oval bowl, so the bowl domes over at the top
-   instead of coming to a point. Thickness eases to zero at both
-   ends so the surface closes as rounded caps.                   */
+   back (underside) for u>0.5.                                    */
 function spoonSurface(u, v, target) {
   const hw = halfWidth(v);
   const b  = shapeB(v);                 // 0 = thin handle lens, 1 = scooped bowl shell
@@ -157,15 +154,18 @@ function spoonSurface(u, v, target) {
   target.set(s * hw, yy, bz + off);
 }
 
-// outline half-width: slim handle (rounded tip) OR rounded oval bowl, whichever is wider
+// outline half-width: slim handle (rounded blunt tip) OR rounded oval bowl, whichever is wider
 function halfWidth(v) {
   return Math.max(handleProfile(v), bowlEllipse(v));
 }
 function handleProfile(v) {
   if (v > 0.56) return 0;
-  const rise = Math.sqrt(clamp(v / 0.08, 0, 1));                 // rounded (not needle) tip
-  const body = lerp(0.115, 0.145, clamp((v - 0.08) / 0.46, 0, 1)); // slim, slight flare to neck
-  return rise * body;
+  const cap = 0.04;                        // rounded end-cap length (in v)
+  if (v < cap) {
+    const t = v / cap;                     // 0..1 over the cap
+    return HANDLE_W * Math.sqrt(Math.max(0, 1 - (1 - t) * (1 - t)));  // semicircle -> blunt rounded end
+  }
+  return lerp(HANDLE_W, 0.16, clamp((v - cap) / 0.5, 0, 1));          // slight flare toward the neck
 }
 function bowlEllipse(v) {
   const t = (v - BOWL_VC) / BOWL_VR;      // -1..1 across the bowl
@@ -178,5 +178,5 @@ function shapeB(v) {
 }
 // ease thickness to zero at both ends (rounded caps), full in the middle
 function thickEnv(v) {
-  return Math.sqrt(clamp(v / 0.06, 0, 1)) * Math.sqrt(clamp((1 - v) / 0.09, 0, 1));
+  return Math.sqrt(clamp(v / 0.05, 0, 1)) * Math.sqrt(clamp((1 - v) / 0.09, 0, 1));
 }
