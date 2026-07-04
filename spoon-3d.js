@@ -1,10 +1,20 @@
 /* ============================================================
-   Spoon USC — hero 3D spoon (Week 2)
-   A dimensional version of the actual logo spoon, floating on
-   the red hero. Reacts to pointer + scroll. Falls back to the
-   static SVG spoon if WebGL is unavailable or motion is reduced.
+   Spoon USC — hero 3D spoon (v2, refined)
+   A real spoon: an elongated, scooped bowl + a slim tapered
+   handle, in warm ivory ceramic under soft studio lighting
+   (image-based reflections). Reacts to pointer + scroll.
+   Falls back to the static SVG spoon if WebGL is unavailable
+   or motion is reduced.
+   ------------------------------------------------------------
+   Easy knobs: SPOON_COLOR / METALNESS / ROUGHNESS below, and
+   toneMappingExposure a few lines down (higher = brighter).
    ============================================================ */
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const SPOON_COLOR = 0xf3e9d8;  // warm ivory. try 0xe9d6ac + METALNESS 1 for champagne metal
+const METALNESS   = 0.0;       // 0 = ceramic, 1 = metal
+const ROUGHNESS   = 0.28;      // lower = glossier
 
 const stage = document.getElementById('spoonStage');
 if (stage) init(stage);
@@ -12,7 +22,6 @@ if (stage) init(stage);
 function init(stage) {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // --- renderer (transparent so the red hero shows through) ---
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -21,37 +30,45 @@ function init(stage) {
   }
   if (!renderer) return;
 
-  // WebGL is good: hide the flat SVG fallback and mount the canvas
   const fallback = stage.querySelector('.hero-spoon');
   if (fallback) fallback.style.display = 'none';
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;      // nudge up if you ever want the spoon brighter
+  renderer.toneMappingExposure = 1.05;
   stage.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-  camera.position.set(0, 0, 7.6);
+  camera.position.set(0, 0, 8);
 
-  // --- lighting: warm key + honey rim on the deep red ---
-  scene.add(new THREE.HemisphereLight(0xfff3e0, 0x4a0a0a, 1.2));
-  const key  = new THREE.DirectionalLight(0xfff1dd, 2.6); key.position.set(3, 4.5, 5);   scene.add(key);
-  const rim  = new THREE.DirectionalLight(0xffcf85, 2.4); rim.position.set(-4.5, 2, -3.5); scene.add(rim);
-  const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(-2.5, -1.5, 3); scene.add(fill);
+  // --- soft studio reflections (procedural, no image files) ---
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const roomEnv = new RoomEnvironment();
+  scene.environment = pmrem.fromScene(roomEnv, 0.04).texture;
+  roomEnv.dispose();
+  pmrem.dispose();
 
-  // --- the spoon (ivory ceramic) ---
+  // --- shaped light on top of the IBL: warm key + honey rim ---
+  scene.add(new THREE.HemisphereLight(0xfff3e0, 0x4a0a0a, 0.35));
+  const key = new THREE.DirectionalLight(0xfff1dd, 1.7); key.position.set(3, 4.5, 5);   scene.add(key);
+  const rim = new THREE.DirectionalLight(0xffcf85, 1.6); rim.position.set(-4.5, 2, -3.5); scene.add(rim);
+
+  // --- material + spoon ---
   const material = new THREE.MeshPhysicalMaterial({
-    color: 0xf5ecdd, metalness: 0.0, roughness: 0.34,
-    clearcoat: 0.7, clearcoatRoughness: 0.28
+    color: SPOON_COLOR, metalness: METALNESS, roughness: ROUGHNESS,
+    clearcoat: 0.85, clearcoatRoughness: 0.2, envMapIntensity: 0.85,
+    side: THREE.DoubleSide   // so the inside of the scoop renders too
   });
-  const mesh = new THREE.Mesh(buildSpoon(), material);
-  const group = new THREE.Group();
-  group.add(mesh);
-  scene.add(group);
 
-  const BASE_RY = 0.30, BASE_RX = -0.12; // resting tilt so it never looks perfectly flat
+  const spoon = buildSpoon(material);
+  spoon.scale.setScalar(0.9);
+  const pivot = new THREE.Group();
+  pivot.add(spoon);
+  scene.add(pivot);
+
+  const BASE_RY = 0.35, BASE_RX = -0.18; // resting pose: turned + tipped to show the scoop
 
   function resize() {
     const w = stage.clientWidth || 1, h = stage.clientHeight || 1;
@@ -62,7 +79,6 @@ function init(stage) {
   resize();
   new ResizeObserver(resize).observe(stage);
 
-  // --- interaction targets ---
   let ptrX = 0, ptrY = 0, curX = 0, curY = 0, scrollF = 0;
   window.addEventListener('pointermove', (e) => {
     ptrX = e.clientX / window.innerWidth - 0.5;
@@ -76,19 +92,18 @@ function init(stage) {
     curX += (ptrX - curX) * 0.05;
     curY += (ptrY - curY) * 0.05;
     const time = t * 0.001;
-    group.rotation.y = BASE_RY + Math.sin(time * 0.32) * 0.28 + curX * 0.5;
-    group.rotation.x = BASE_RX + Math.sin(time * 0.24) * 0.10 + curY * 0.35;
-    group.position.y = Math.sin(time * 0.6) * 0.10 - scrollF * 0.4;   // float + drift up as you scroll
-    group.scale.setScalar(1 - scrollF * 0.12);
+    pivot.rotation.y = BASE_RY + Math.sin(time * 0.32) * 0.32 + curX * 0.5;
+    pivot.rotation.x = BASE_RX + Math.sin(time * 0.24) * 0.09 + curY * 0.32;
+    pivot.position.y = Math.sin(time * 0.6) * 0.10 - scrollF * 0.4;
+    pivot.scale.setScalar(0.9 * (1 - scrollF * 0.12));
     renderer.render(scene, camera);
   }
 
-  // paint one static, tilted frame immediately (also the reduced-motion end state)
-  group.rotation.set(BASE_RX, BASE_RY, 0);
+  // one static frame first (also the reduced-motion end state)
+  pivot.rotation.set(BASE_RX, BASE_RY, 0);
   renderer.render(scene, camera);
   if (reduceMotion) return;
 
-  // --- animation loop, paused when off-screen or tab hidden ---
   let raf = 0, running = false;
   const loop = (t) => { if (!running) return; drawFrame(t); raf = requestAnimationFrame(loop); };
   const start = () => { if (!running) { running = true; raf = requestAnimationFrame(loop); } };
@@ -99,27 +114,67 @@ function init(stage) {
   start();
 }
 
-/* Build the logo spoon as 3D geometry: an elliptical bowl + a
-   tapered handle, extruded with soft beveled edges. Proportions
-   match spoon-logo.svg (bowl rx/ry 12.5/16.5, handle to y~80). */
-function buildSpoon() {
-  const bowl = new THREE.Shape();
-  bowl.absellipse(0, 0.0, 0.76, 1.0, 0, Math.PI * 2, false);
+/* ---- geometry ------------------------------------------------ */
 
-  const handle = new THREE.Shape();
-  const topY = -0.90, tipY = -2.78, halfTop = 0.255, halfTip = 0.10, round = 0.13;
-  handle.moveTo(-halfTop, topY);
-  handle.lineTo(-halfTip, tipY + round);
-  handle.quadraticCurveTo(-halfTip, tipY, 0, tipY);        // rounded tip
-  handle.quadraticCurveTo(halfTip, tipY, halfTip, tipY + round);
-  handle.lineTo(halfTop, topY);
-  handle.quadraticCurveTo(0, topY - 0.10, -halfTop, topY); // blends up under the bowl (hidden in overlap)
+function buildSpoon(material) {
+  const spoon = new THREE.Group();
 
-  const geometry = new THREE.ExtrudeGeometry([bowl, handle], {
-    depth: 0.34, bevelEnabled: true, bevelThickness: 0.10,
-    bevelSize: 0.09, bevelSegments: 5, curveSegments: 72
+  const bowl = new THREE.Mesh(makeBowl(), material);
+  bowl.position.y = 0.9;
+  spoon.add(bowl);
+
+  const handle = new THREE.Mesh(makeHandle(), material);
+  spoon.add(handle);
+
+  // recenter the whole thing so it rotates about its middle
+  const box = new THREE.Box3().setFromObject(spoon);
+  const c = new THREE.Vector3(); box.getCenter(c);
+  bowl.position.sub(c);
+  handle.position.sub(c);
+  return spoon;
+}
+
+// Elongated, scooped bowl. A lathe profile (outer underside -> rim ->
+// inner scoop) gives a real concave bowl; then we squash it to an oval.
+function makeBowl() {
+  const V = THREE.Vector2;
+  const profile = [
+    new V(0.00, 0.00),  // underside center (back of bowl)
+    new V(0.30, 0.02),
+    new V(0.58, 0.09),
+    new V(0.80, 0.22),
+    new V(0.94, 0.40),
+    new V(1.00, 0.52),  // rim outer
+    new V(1.00, 0.55),  // rim lip
+    new V(0.90, 0.52),  // rim inner
+    new V(0.72, 0.44),
+    new V(0.48, 0.34),
+    new V(0.24, 0.28),
+    new V(0.00, 0.26),  // scoop center (front, faces viewer)
+  ];
+  const geo = new THREE.LatheGeometry(profile, 96);
+  geo.scale(0.85, 0.85, 1.15);   // width, scoop depth, length
+  geo.rotateX(Math.PI / 2);      // scoop opens toward camera (+Z); length -> vertical
+  geo.computeVertexNormals();
+  return geo;
+}
+
+// Slim, gently tapered handle with a rounded tip, softly beveled.
+function makeHandle() {
+  const w0 = 0.26, w1 = 0.12, top = 0.15, tip = -2.55, r = 0.12;
+  const s = new THREE.Shape();
+  s.moveTo(-w0, top);
+  s.lineTo(-w1, tip + r);
+  s.quadraticCurveTo(-w1, tip, 0, tip);   // rounded tip
+  s.quadraticCurveTo(w1, tip, w1, tip + r);
+  s.lineTo(w0, top);
+  s.quadraticCurveTo(0, top + 0.10, -w0, top); // blends up under the bowl (hidden in overlap)
+
+  const geo = new THREE.ExtrudeGeometry(s, {
+    depth: 0.22, bevelEnabled: true, bevelThickness: 0.08,
+    bevelSize: 0.07, bevelSegments: 4, curveSegments: 24
   });
-  geometry.center();
-  geometry.computeVertexNormals();
-  return geometry;
+  geo.translate(0, 0, -0.15);   // roughly center the handle's front-back depth
+  geo.computeVertexNormals();
+  return geo;
 }
